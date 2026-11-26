@@ -1,0 +1,232 @@
+menu "Example Configuration"
+
+    choice BLE_MESH_EXAMPLE_BOARD
+        prompt "Board selection for BLE Mesh"
+        default BLE_MESH_ESP_WROOM_32 if IDF_TARGET_ESP32
+        default BLE_MESH_ESP32C3_DEV if IDF_TARGET_ESP32C3
+        default BLE_MESH_ESP32S3_DEV if IDF_TARGET_ESP32S3
+        default BLE_MESH_ESP32C6_DEV if IDF_TARGET_ESP32C6
+        default BLE_MESH_ESP32H2_DEV if IDF_TARGET_ESP32H2
+        help
+            Select this option to choose the board for BLE Mesh. The default is ESP32-WROOM-32
+
+        config BLE_MESH_ESP_WROOM_32
+            bool "ESP32-WROOM-32"
+            depends on IDF_TARGET_ESP32
+
+        config BLE_MESH_ESP_WROVER
+            bool "ESP32-WROVER"
+            depends on IDF_TARGET_ESP32
+
+        config BLE_MESH_ESP32C3_DEV
+            bool "ESP32C3-DevKitC"
+            depends on IDF_TARGET_ESP32C3
+
+        config BLE_MESH_ESP32S3_DEV
+            bool "ESP32S3-DevKitC"
+            depends on IDF_TARGET_ESP32S3
+
+        config BLE_MESH_ESP32C6_DEV
+            bool "ESP32C6-DevKitC"
+            depends on IDF_TARGET_ESP32C6
+
+        config BLE_MESH_ESP32H2_DEV
+            bool "ESP32H2-DevKitC"
+            depends on IDF_TARGET_ESP32H2
+
+        config BLE_MESH_ESP32C5_DEV
+            bool "ESP32C5-DevKitC"
+            depends on IDF_TARGET_ESP32C5
+
+        config BLE_MESH_ESP32C61_DEV
+            bool "ESP32C61-DevKitC"
+            depends on IDF_TARGET_ESP32C61
+
+    endchoice
+
+endmenu
+
+menu "Device Role Configuration"
+
+    config DEVICE_ROLE_FORCE_MASTER
+        bool "Force device role to MASTER node"
+        default y
+        help
+            Forces this device to operate as MASTER node, bypassing Holtek UART probe
+            and ignoring stored NORMAL_NODE in NVS. Ensures Wi-Fi provisioning runs on this node.
+
+endmenu
+
+menu "Boot & Diagnostics Configuration"
+
+    config APP_BOOT_DEBUG
+        bool "Enable verbose boot & subsystem diagnostics"
+        default y
+        help
+            Enables detailed boot sequence diagnostics, reset reason analysis,
+            heap checkpoints before/after each subsystem, composition data dump,
+            and an early shutdown backtrace handler.
+
+endmenu
+
+menu "Wi-Fi Provisioning Configuration"
+
+    config WIFI_PROV_DEBUG
+        bool "Enable verbose Wi-Fi provisioning debug logging"
+        default n
+        help
+            Logs detailed detector timing, state transitions, heap diagnostics, and Wi-Fi events under tag 'wifi_prov'.
+
+    config WIFI_PROV_FORCE_START
+        bool "Force start provisioning SoftAP at boot (split test)"
+        default n
+        help
+            Starts Wi-Fi SoftAP ('lumflux_device') and HTTP web server immediately at boot,
+            bypassing the 5-press mechanical switch trigger. Used for split testing.
+
+    config WIFI_PROV_SWITCH_GPIO
+        int "Direct GPIO for Switch #1 / BOOT button (-1 to disable)"
+        default 9
+        range -1 21
+        help
+            GPIO pin for Switch #1. On ESP32-C3 DevKitM-1, GPIO 9 is the BOOT button. Set to -1 if using only Holtek UART.
+
+    config WIFI_PROV_PRESS_GAP_MS
+        int "Five-press maximum gap between presses (ms)"
+        default 1500
+        help
+            Maximum time in milliseconds allowed between consecutive presses of switch #1.
+            A longer gap restarts the 5-press count.
+
+    config WIFI_PROV_PRESS_WINDOW_MS
+        int "Five-press maximum sequence window (ms)"
+        default 10000
+        help
+            Maximum total time in milliseconds for the entire 5-press sequence.
+
+    config WIFI_PROV_DEBOUNCE_MS
+        int "Switch #1 press debounce time (ms)"
+        default 40
+        range 20 100
+        help
+            Contact bounce rejection threshold in milliseconds.
+
+    config WIFI_PROV_AP_SSID
+        string "SoftAP SSID"
+        default "lumflux_device"
+        help
+            SSID broadcast by the ESP32-C3 Master node during provisioning mode.
+
+    config WIFI_PROV_AP_PASSWORD
+        string "SoftAP Password (empty for open network)"
+        default ""
+        help
+            WPA2 passphrase for the provisioning SoftAP. Leave empty for an open network.
+
+    config WIFI_PROV_AP_CHANNEL
+        int "SoftAP Channel"
+        default 1
+        range 1 13
+        help
+            Default Wi-Fi channel for the provisioning SoftAP.
+
+    config WIFI_PROV_AP_MAX_CONN
+        int "SoftAP Max Client Connections"
+        default 4
+        range 2 4
+        help
+            Maximum simultaneous client connections to the provisioning SoftAP (2-4).
+
+    config WIFI_PROV_IDLE_TIMEOUT_SEC
+        int "Provisioning Idle Timeout (seconds)"
+        default 300
+        range 30 1800
+        help
+            Time in seconds before provisioning mode automatically stops if idle.
+
+    config WIFI_PROV_CONNECT_TIMEOUT_SEC
+        int "Wi-Fi STA Connect Timeout (seconds)"
+        default 20
+        range 5 60
+        help
+            Maximum time in seconds to wait for a connection and IP address before reporting failure.
+
+    config WIFI_AUTOSTART
+        bool "Enable automatic Wi-Fi STA connection at boot"
+        default y
+        help
+            When enabled, automatically attempts to connect to saved Wi-Fi credentials
+            after BLE Mesh initialization and boot delay.
+
+    config WIFI_BOOT_DELAY_MS
+        int "Wi-Fi autoconnect boot delay after mesh init (ms)"
+        default 8000
+        range 1000 60000
+        help
+            Time in milliseconds to delay starting the Wi-Fi radio after BLE Mesh initialization.
+            Allows BLE Mesh stack to stabilize, process unprovisioned beacons or proxy connections,
+            and prevents simultaneous radio surge brownouts.
+
+endmenu
+
+menu "Schedule & NTP Configuration"
+
+    config SCHED_TIMEZONE
+        string "POSIX Timezone String"
+        default "IST-5:30"
+        help
+            POSIX timezone string for the system clock. Default is IST-5:30 for India Standard Time (UTC+5:30, no DST).
+
+    config SCHED_NTP_SERVER
+        string "Primary NTP Server"
+        default "pool.ntp.org"
+        help
+            SNTP server hostname or IP address.
+
+    config SCHED_VENDOR_COMPANY_ID
+        hex "BLE Mesh Vendor Model Company ID"
+        default 0x02E5
+        help
+            16-bit Bluetooth SIG Company Identifier (0x02E5 for Espressif Systems).
+
+    config SCHED_VENDOR_MODEL_ID
+        hex "BLE Mesh Vendor Model ID"
+        default 0x0001
+        help
+            16-bit Vendor Model Identifier for schedule management.
+
+    config SCHED_MAX_COUNT
+        int "Maximum number of stored schedules"
+        default 16
+        range 1 32
+        help
+            Maximum schedules that can be stored in NVS.
+
+    config SCHED_MAX_ACTIONS
+        int "Maximum actions per schedule"
+        default 8
+        range 1 16
+        help
+            Maximum actions per schedule entry.
+
+    config SCHED_ENABLE
+        bool "Enable Autonomous Scheduler Engine"
+        default y
+        help
+            Enables the background minute-timer scheduler engine task and execution.
+
+    config VENDOR_MODEL_ENABLE
+        bool "Enable Schedule BLE Mesh Vendor Model (0x02E50001)"
+        default y
+        help
+            Enables registration and callbacks for the custom vendor model on Element 0.
+
+    config SNTP_ENABLE
+        bool "Enable SNTP Time Synchronization"
+        default y
+        help
+            Enables SNTP client initialization and periodic time sync upon Wi-Fi connection.
+
+endmenu
+
+

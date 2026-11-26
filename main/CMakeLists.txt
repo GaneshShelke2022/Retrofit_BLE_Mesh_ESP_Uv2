@@ -1,0 +1,26 @@
+set(srcs "main.c"
+         "common/board.c"
+         "relay/relay_hw.c"
+         "storage/storage.c"
+         "mesh/mesh_init.c"
+         "mesh/mesh_models.c"
+         "mesh/mesh_callbacks.c"
+         "mesh/mesh_provisioning.c"
+         "moduls/device_role.c"
+         "moduls/five_press_detector.c"
+         "moduls/wifi_provisioning.c"
+         "moduls/ntp_time.c"
+         "moduls/schedule_model.c"
+         "moduls/schedule_storage.c"
+         "moduls/schedule_engine.c"
+         "moduls/schedule_mesh_vendor.c")
+
+idf_component_register(SRCS "${srcs}"
+                       INCLUDE_DIRS "."
+                                    "common"
+                                    "relay"
+                                    "storage"
+                                    "mesh"
+                                    "moduls"
+                       PRIV_REQUIRES uart_driver holtek_protocol relay_manager driver bt nvs_flash example_init esp_driver_gpio esp_driver_uart esp_wifi esp_event esp_netif esp_http_server lwip)
+

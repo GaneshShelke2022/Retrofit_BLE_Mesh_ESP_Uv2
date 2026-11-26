@@ -1,0 +1,17 @@
+# Override some defaults so BT stack is enabled
+# by default in this example
+CONFIG_IDF_TARGET="esp32c3"
+CONFIG_BT_CTRL_SCAN_DUPL_TYPE_DATA_DEVICE=y
+CONFIG_BT_CTRL_BLE_MESH_SCAN_DUPL_EN=y
+CONFIG_BT_BLE_42_FEATURES_SUPPORTED=y
+CONFIG_BT_BLE_50_FEATURES_SUPPORTED=n
+# Provisioning / configuration records (NetKey, AppKey, bindings, pub/sub) are
+# written to NVS immediately, so a power cut right after provisioning cannot lose them.
+CONFIG_BLE_MESH_STORE_TIMEOUT=0
+CONFIG_BLE_MESH_SEQ_STORE_RATE=128
+
+# Reboot-persistence fix: Bluedroid and ESP-BLE-MESH share one pool of alarms.
+# This composition needs ~49 of them before the mesh settings (NVS) module is
+# initialised, so with the default of 50 the settings timer is never created and
+# the node can neither save nor restore its provisioning. Keep this >= 80.
+CONFIG_BT_ALARM_MAX_NUM=100
